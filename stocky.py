@@ -3,18 +3,39 @@ from CSVstocky import *
 from organize import *
 from tickers import *
 
+def menu(menu_selection):
+    
+    match menu_selection:
+        case '1':
+            for tickers in all_tickers:
+                data_dump(tickers)
+
+        case '2':
+            for tickers in all_tickers:
+                ma_create(tickers)
+                    
+        case '3':
+            data_dump()
+            for tickers in all_tickers:
+                ma_create(tickers)
+            
+        case '4':
+            os.system('cut -d, -f1,12 buy_signals/Master_buy_signals.csv | sort -t, -k1,1r | column -s, -t ')
+        
+        case '5':
+            os.system('cut -d, -f1,12 sell_signals/Master_sell_signals.csv | sort -t, -k1,1r | column -s, -t ')
+
+        case _:
+            return 'Invalide choice'
+
+
+
 
 def main():
 
-    # NEED to add menu
-    
-    # Downloads a fresh report of all tickers
-    fresh_data = input('Do you need to download fresh csv data?(y/n) ')
-    if fresh_data == 'y':
-        for tickers in all_tickers:
-            data_dump(tickers)
-    else:
-        pass
+    # NEED to add menu here we go!!!
+    logo()
+
 
     #Check folder structure exists for newly created files
     organize.image_folder_check()
@@ -22,17 +43,16 @@ def main():
     organize.sell_signal_check()
     print('\n')
 
-
-    runAll = input ('do you want to run the rack?(y/n) ')
-
-    if runAll == 'y':
-        for tickers in all_tickers:
-            ma_create(tickers)
-    else:
-        runOne = input('Which one do you want to see? ')
-        ma_create(runOne)
+    print('1. Download Historical Data')
+    print('2. Run Moving Average for ALL stocks')
+    print('3. Run the rack!')
+    print('4. Show the buy signal outputs')
+    print('5. Show the sell signal outputs')
     
-    os.system('cut -d, -f1,12 buy_signals/Master_buy_signals.csv | sort -t, -k1,1r | column -s, -t ')
+    menu_selection = input("\nEnter a selection from menu: ")
+    menu(menu_selection)
+ 
+    
 
 if __name__ == "__main__":
     main()
