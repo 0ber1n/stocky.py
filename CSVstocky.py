@@ -85,3 +85,4 @@ def ma_create(stock_name):
 
     # Append to Master sell signals file
     append_to_master('sell_signals/Master_sell_signals.csv', sell_signals)
+
