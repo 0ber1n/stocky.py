@@ -6,7 +6,7 @@ from tickers import *
 
 def main():
 
-    # Downloads a fresh report
+    # Downloads a fresh report of all tickers
     fresh_data = input('Do you need to download fresh csv data?(y/n) ')
     if fresh_data == 'y':
         for tickers in all_tickers:
