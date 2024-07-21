@@ -1,0 +1,7 @@
+# Folder structure gets created by stocks.py script. No need to upload to repo
+
+__pycache__
+buy_signals
+graph_signals
+sell_signals
+stocks
