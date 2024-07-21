@@ -6,6 +6,8 @@ from tickers import *
 
 def main():
 
+    # NEED to add menu
+    
     # Downloads a fresh report of all tickers
     fresh_data = input('Do you need to download fresh csv data?(y/n) ')
     if fresh_data == 'y':
