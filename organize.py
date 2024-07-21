@@ -37,6 +37,16 @@ def buy_signal_check():
     else: 
         print('Buy Signal folder exists.')
 
+def stock_folder_check():
+    stock_path = 'stocks'
+    if not os.path.exists(stock_path):
+        print('Stocks folder does not exist, creating folder')
+        os.makedirs(stock_path)
+        print(stock_path + ' created')
+        
+    else: 
+        print('Stocks folder exists.')
+
 
 def logo():
     print('''  

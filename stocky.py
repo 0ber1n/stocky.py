@@ -41,6 +41,7 @@ def main():
     organize.image_folder_check()
     organize.buy_signal_check()
     organize.sell_signal_check()
+    organize.stock_folder_check()
     print('\n')
 
     print('1. Download Historical Data')
