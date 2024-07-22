@@ -15,7 +15,8 @@ def menu(menu_selection):
                 ma_create(tickers)
                     
         case '3':
-            data_dump()
+            for tickers in all_tickers:
+                data_dump(tickers)
             for tickers in all_tickers:
                 ma_create(tickers)
             
