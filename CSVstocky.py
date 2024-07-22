@@ -11,8 +11,6 @@ import organize
 def ma_create(stock_name):
     file_path = 'stocks/' + stock_name + '.csv'
 
-
-
     data = pd.read_csv(file_path)
     print('This is for the stock:' + stock_name)
     print('\n')
@@ -47,7 +45,7 @@ def ma_create(stock_name):
     plt.plot(data['Date'], data['200_SMA'], label='200-Day SMA', color='red')
     plt.scatter(buy_signals['Date'], buy_signals['Close'], label='Buy Signal', marker='^', color='green', alpha=1)
     plt.scatter(sell_signals['Date'], sell_signals['Close'], label='Sell Signal', marker='v', color='red', alpha=1)
-    plt.title('Stock Price with Buy and Sell Signals')
+    plt.title('Stock Price with Buy and Sell Signals: ' + stock_name)
     plt.xlabel('Date')
     plt.ylabel('Price')
     plt.legend()
