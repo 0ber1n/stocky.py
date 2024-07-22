@@ -3,8 +3,17 @@ from CSVstocky import *
 from organize import *
 from tickers import *
 
-def menu(menu_selection):
-    
+
+def menu():
+
+    print('1. Download Historical Data')
+    print('2. Run Moving Average for ALL stocks')
+    print('3. Run the rack!')
+    print('4. Show the buy signal outputs')
+    print('5. Show the sell signal outputs')
+
+    menu_selection = input("\nEnter a selection from menu: ")
+
     match menu_selection:
         case '1':
             for tickers in all_tickers:
@@ -31,10 +40,9 @@ def menu(menu_selection):
 
 
 
-
 def main():
 
-    # NEED to add menu here we go!!!
+
     logo()
 
 
@@ -45,14 +53,18 @@ def main():
     organize.stock_folder_check()
     print('\n')
 
-    print('1. Download Historical Data')
-    print('2. Run Moving Average for ALL stocks')
-    print('3. Run the rack!')
-    print('4. Show the buy signal outputs')
-    print('5. Show the sell signal outputs')
-    
-    menu_selection = input("\nEnter a selection from menu: ")
-    menu(menu_selection)
+    # menu_selection = input("\nEnter a selection from menu: ")
+    menu()
+
+    cont = input('\nWould you like to perform another action?(y/n) ')
+
+    # Allows for program to keep running after a selection is performed
+    while (cont == 'y'):
+        menu()
+        cont = input('\nWould you like to perform another action?(y/n) ')
+        
+
+    print("Thanks for getting your stocky on, byeeeee")     
  
     
 
