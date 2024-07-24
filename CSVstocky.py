@@ -8,26 +8,29 @@ from datetime import datetime
 current_date = datetime.now().strftime('%Y_%m_%d')
 current_time = datetime.now().strftime('%H:%M:%S')
 
-def rsi_creation(data):
-
+def rsi_creation(data, window=14):
 
     # Calcutlate Relative Strength Indenx (RSI)
-    rs_window = 14
-    delta = data['Close'].diff()
+    delta = data['Close'].pct_change() * 100
 
     gain = delta.where(delta > 0, 0)
     loss = -delta.where(delta < 0, 0)
 
-    avg_gain = gain.rolling(window=rs_window, min_periods=1).mean()
-    avg_loss = loss.rolling(window=rs_window, min_periods=1).mean()
+    avg_gain = gain.rolling(window=window, min_periods=1).mean()
+    avg_loss = loss.rolling(window=window, min_periods=1).mean()
 
-    rs = avg_gain/avg_loss
-    rsi = 100 - (100/(1+rs))
-    
+    for i in range(window, len(avg_gain)):
+        avg_gain.iloc[i] = ((avg_gain.iloc[i-1] * (window -1)) + gain.iloc[i]) / window
+        avg_loss.iloc[i] = ((avg_loss.iloc[i-1] * (window -1)) + loss.iloc[i]) / window
+
+    rs = avg_gain / avg_loss
+    rsi = 100 - (100/(1 + rs))
+
+     
     data['RSI'] = rsi
 
     global rsi_recent
-    rsi_recent = rsi.iloc[-1]
+    rsi_recent = data['RSI'].iloc[-1]
 
     return data
 
@@ -116,7 +119,6 @@ def ma_create(stock_name):
     data['Date'] = pd.to_datetime(data['Date'])
     data = data.sort_values('Date')
     data.set_index('Date', inplace=True) 
-    
 
     # Calculate simple moving averages (SMA)
     data['50_SMA'] = data['Close'].rolling(window=50).mean()
@@ -127,6 +129,7 @@ def ma_create(stock_name):
     data['20_EMA'] = data['Close'].ewm(span=20, adjust=False).mean()
 
     data = rsi_creation(data)
+
     data = macd_creation(data)
 
     data = trend_identify(data,'50_SMA','200_SMA', stock_name)
