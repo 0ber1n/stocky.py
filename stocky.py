@@ -44,6 +44,7 @@ def main():
     #Check folder structure exists for newly created files
     organize.image_folder_check()
     organize.stock_folder_check()
+    organize.trends_folder_check()
     print('\n')
 
     # menu_selection = input("\nEnter a selection from menu: ")

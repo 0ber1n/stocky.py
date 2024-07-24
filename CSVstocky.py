@@ -3,7 +3,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 import organize
+from datetime import datetime
 
+current_date = datetime.now().strftime('%Y_%m_%d')
+current_time = datetime.now().strftime('%H:%M:%S')
 
 def rsi_creation(data):
 
@@ -45,9 +48,65 @@ def macd_creation(data):
 
     return data
 
+def calculate_uptick(sma):
+    
+    last_4_days_sma = sma[-10:]
+    
+    # Calculate the uptick values 
+    uptick_values = last_4_days_sma.diff().fillna(0)
+    
+    return uptick_values
+
+def trend_identify(df, sma50, sma200, stock_name):
+    recent_trend_days = 10
+
+    # Open the file in append mode
+    with open('trends/' + current_date +'_trend_analysis_output.txt', 'a') as f:
+        df['Recent_Trend'] = df[sma50].diff(periods=1)
+        f.write('Recent Trend Calculation for:' + stock_name +'\n')
+        f.write(df[['Recent_Trend']].tail(recent_trend_days).to_string())
+        f.write('\n\n')
+
+        def trend_direction(value):
+            if value > 0:
+                return 'Up Trend'
+            elif value < 0:
+                return 'Down Trend'
+            else:
+                return 'Sideways Trend'
+        
+        df['Trend'] = df['Recent_Trend'].apply(trend_direction)
+        f.write("Trend Direction Calculation:\n")
+        f.write(df[['Trend']].tail(recent_trend_days).to_string())
+        f.write('\n\n')
+
+        # Checking the proximity to a possible golden cross
+        df['golden_cross_check'] = df[sma200] - df[sma50]
+        print(df[sma50].iloc[-1])
+        print(df[sma200].iloc[-1])
+        if df[sma50].iloc[-1] < df[sma200].iloc[-1]:
+            df['Getting_Closer'] = df['golden_cross_check'].diff().apply(lambda x: 'Yes' if x < 0 else 'No')
+            f.write("Golden Cross Check:\n")
+            f.write(df[['golden_cross_check', 'Getting_Closer']].tail(recent_trend_days).to_string())
+            f.write('\n\n')
+        else:
+            # df['Getting_Closer'] = 'Too late to join or time to sell.'
+            f.write('Golden Cross Check:\n')
+            f.write('Too late to join or time to sell.\n')
+            f.write('\n')
+        
+        f.write('**************************\n')
+    
+    return df
+
 
 
 def ma_create(stock_name):
+
+    current_datetime = datetime.now()
+    current_date = current_datetime.strftime("%Y_%m_%d")
+    durrent_time = current_datetime.strftime('%H:%M:%S')
+
     file_path = 'stocks/' + stock_name + '.csv'
 
     data = pd.read_csv(file_path)
@@ -69,7 +128,8 @@ def ma_create(stock_name):
 
     data = rsi_creation(data)
     data = macd_creation(data)
-   
+
+    data = trend_identify(data,'50_SMA','200_SMA', stock_name)
 
     # Plotting
     # First Plot: Price and Moving Averages
