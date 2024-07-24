@@ -3,7 +3,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 import organize
+from datetime import datetime
 
+current_date = datetime.now().strftime('%Y_%m_%d')
+current_time = datetime.now().strftime('%H:%M:%S')
 
 def rsi_creation(data):
 
@@ -45,19 +48,75 @@ def macd_creation(data):
 
     return data
 
+def calculate_uptick(sma):
+    
+    last_4_days_sma = sma[-10:]
+    
+    # Calculate the uptick values 
+    uptick_values = last_4_days_sma.diff().fillna(0)
+    
+    return uptick_values
+
+def trend_identify(df, sma50, sma200, stock_name):
+    recent_trend_days = 10
+
+    # Open the file in append mode
+    with open('trends/' + current_date +'_trend_analysis_output.txt', 'a') as f:
+        df['Recent_Trend'] = df[sma50].diff(periods=1)
+        f.write('Recent Trend Calculation for:' + stock_name +'\n')
+        f.write(df[['Recent_Trend']].tail(recent_trend_days).to_string())
+        f.write('\n\n')
+
+        def trend_direction(value):
+            if value > 0:
+                return 'Up Trend'
+            elif value < 0:
+                return 'Down Trend'
+            else:
+                return 'Sideways Trend'
+        
+        df['Trend'] = df['Recent_Trend'].apply(trend_direction)
+        f.write("Trend Direction Calculation:\n")
+        f.write(df[['Trend']].tail(recent_trend_days).to_string())
+        f.write('\n\n')
+
+        # Checking the proximity to a possible golden cross
+        df['golden_cross_check'] = df[sma200] - df[sma50]
+        print(df[sma50].iloc[-1])
+        print(df[sma200].iloc[-1])
+        if df[sma50].iloc[-1] < df[sma200].iloc[-1]:
+            df['Getting_Closer'] = df['golden_cross_check'].diff().apply(lambda x: 'Yes' if x < 0 else 'No')
+            f.write("Golden Cross Check:\n")
+            f.write(df[['golden_cross_check', 'Getting_Closer']].tail(recent_trend_days).to_string())
+            f.write('\n\n')
+        else:
+            # df['Getting_Closer'] = 'Too late to join or time to sell.'
+            f.write('Golden Cross Check:\n')
+            f.write('Too late to join or time to sell.\n')
+            f.write('\n')
+        
+        f.write('**************************\n')
+    
+    return df
+
 
 
 def ma_create(stock_name):
+
+    current_datetime = datetime.now()
+    current_date = current_datetime.strftime("%Y_%m_%d")
+    durrent_time = current_datetime.strftime('%H:%M:%S')
+
     file_path = 'stocks/' + stock_name + '.csv'
 
     data = pd.read_csv(file_path)
-    print('This is for the stock:' + stock_name)
-    print('\n')
-
+    print('Creating datapoints for ' + stock_name)
+    
     # Ensure data is sorted by date
     data['Date'] = pd.to_datetime(data['Date'])
     data = data.sort_values('Date')
     data.set_index('Date', inplace=True) 
+    
 
     # Calculate simple moving averages (SMA)
     data['50_SMA'] = data['Close'].rolling(window=50).mean()
@@ -67,93 +126,49 @@ def ma_create(stock_name):
     data['8_EMA'] = data['Close'].ewm(span=8, adjust=False).mean()
     data['20_EMA'] = data['Close'].ewm(span=20, adjust=False).mean()
 
-    # Generate buy/sell signals using .loc
-    data['Signal'] = 0
-    data.iloc[50:, data.columns.get_loc('Signal')] = np.where(
-        data.iloc[50:, data.columns.get_loc('50_SMA')] > data.iloc[50:, data.columns.get_loc('200_SMA')], 1, 0
-    )
-    data['Position'] = data['Signal'].diff()
-
-    # Extract buy/sell signals
-    buy_signals = data[data['Position'] == 1].copy()
-    sell_signals = data[data['Position'] == -1].copy()
-
-    # Add column to the Dataframe with ticker name for archive records
-    if not buy_signals.empty:
-        buy_signals.loc[:, 'Ticker'] = stock_name
-
-    if not sell_signals.empty:
-        sell_signals.loc[:, 'Ticker'] = stock_name
-
     data = rsi_creation(data)
     data = macd_creation(data)
-   
-    # Debug: Print out date range to check
-    print("Data Date Range: ", data.index.min(), " to ", data.index.max())
+
+    data = trend_identify(data,'50_SMA','200_SMA', stock_name)
 
     # Plotting
-    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(14, 10), sharex=True)
-
+    # First Plot: Price and Moving Averages
+    fig, ax1 = plt.subplots(figsize=(14, 7))
 
     ax1.plot(data.index, data['Close'], label='Close Price', color='blue')
     ax1.plot(data.index, data['50_SMA'], label='50-Day SMA', color='orange')
     ax1.plot(data.index, data['200_SMA'], label='200-Day SMA', color='red')
     ax1.plot(data.index, data['8_EMA'], label='8-Day EMA', color='pink')
     ax1.plot(data.index, data['20_EMA'], label='20-Day EMA', color='black')
-    ax1.scatter(buy_signals.index, buy_signals['Close'], label='Buy Signal', marker='^', color='green', alpha=1)
-    ax1.scatter(sell_signals.index, sell_signals['Close'], label='Sell Signal', marker='v', color='red', alpha=1)
     ax1.set_title(stock_name + ' (RSI = ' + str(rsi_recent.round(2)) + ')')
     ax1.set_xlabel('Date')
     ax1.set_ylabel('Price')
     ax1.legend()
     ax1.grid()
 
-    # Plot MACD data in the second subplot (ax2)
+    plt.tight_layout()
+    plt.savefig('graph_images/' + stock_name + '_price.png')
+    plt.close()
+
+    # Second Plot: MACD
+    fig, ax2 = plt.subplots(figsize=(14, 7))
+
     ax2.plot(data.index, data['MACD'], label='MACD', color='g')
     ax2.plot(data.index, data['MACD_Signal'], label='Signal Line', color='r')
     ax2.bar(data.index, data['MACD_Hist'], label='MACD Hist', color='b', alpha=0.3)
-    ax2.set_title('MACD')
+    ax2.set_title('MACD for ' + stock_name)
+    ax2.set_xlabel('Date')
     ax2.legend()
     ax2.grid()
 
     for label in ax2.get_xticklabels():
         label.set_rotation(45)
 
-    # Save the plot as an image file
     plt.tight_layout()
-    plt.savefig('graph_images/' +stock_name +'.png')
-
-    # Close the plot to free memory
+    plt.savefig('graph_images/' + stock_name + '_macd.png')
     plt.close()
 
-    # Display buy/sell signals
-    print("Buy Signals:")
-    print(buy_signals[['Close', '50_SMA', '200_SMA']])
-
-    print("\nSell Signals:")
-    print(sell_signals[['Close', '50_SMA', '200_SMA']])
-    print('\n')
-
-    # Save buy/sell signals to CSV for reference
-    buy_signals.to_csv('buy_signals/' + stock_name + '_buy_signals.csv', index=False)
-    sell_signals.to_csv('sell_signals/' + stock_name + '_sell_signals.csv', index=False)
+    
 
 
-    def append_to_master(master_path, signals):
-        if os.path.isfile(master_path):
-            master_df = pd.read_csv(master_path)
-            combined_df = pd.concat([master_df, signals]).drop_duplicates(subset=['Date', 'Ticker'], keep='last')
-            combined_df.to_csv(master_path, mode='w', header=True, index=False)
-        else:
-            signals.to_csv(master_path, mode='w', header=True, index=False)
 
-    # Append to Master buy signals file
-    append_to_master('buy_signals/Master_buy_signals.csv', buy_signals)
-
-    # Append to Master sell signals file
-    append_to_master('sell_signals/Master_sell_signals.csv', sell_signals)
-
-
-# stock_name = 'AAPL'
-# file_path = 'stocks/' + stock_name + '.csv'
-# print(rsi_creation(file_path))

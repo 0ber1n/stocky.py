@@ -2,6 +2,7 @@
 
 import os
 import matplotlib.pyplot as plt
+from datetime import datetime
 
 
 def image_folder_check():
@@ -14,28 +15,8 @@ def image_folder_check():
         
     else: 
         print('Graph folder exists.')
-        
-
-def sell_signal_check():
-    sell_path = 'sell_signals'
-    if not os.path.exists(sell_path):
-        print('Sell Signal folder does not exist, creating folder')
-        os.makedirs(sell_path)
-        print(sell_path + ' created')
-        
-    else: 
-        print('Sell Signal folder exists.')
-        
-
-def buy_signal_check():
-    buy_path = 'buy_signals'
-    if not os.path.exists(buy_path):
-        print('Buy Signal folder does not exist, creating folder')
-        os.makedirs(buy_path)
-        print(buy_path + ' created')
-        
-    else: 
-        print('Buy Signal folder exists.')
+        current_date = datetime.now().strftime('%Y_%M_%D')
+current_time = datetime.now().strftime('%H:%M:%S')
 
 def stock_folder_check():
     stock_path = 'stocks'
@@ -46,6 +27,16 @@ def stock_folder_check():
         
     else: 
         print('Stocks folder exists.')
+
+def trends_folder_check():
+    trends_path = 'trends'
+    if not os.path.exists(trends_path):
+        print('Trends folder does not exist, creating folder')
+        os.makedirs(trends_path)
+        print(trends_path + ' created')
+        
+    else: 
+        print('Trends folder exists.')
 
 
 def logo():
@@ -63,3 +54,4 @@ def logo():
                                                                     
                                                                     
 ''')
+    
