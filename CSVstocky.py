@@ -85,8 +85,6 @@ def trend_identify(df, sma50, sma200, stock_name):
 
         # Checking the proximity to a possible golden cross
         df['golden_cross_check'] = df[sma200] - df[sma50]
-        print(df[sma50].iloc[-1])
-        print(df[sma200].iloc[-1])
         if df[sma50].iloc[-1] < df[sma200].iloc[-1]:
             df['Getting_Closer'] = df['golden_cross_check'].diff().apply(lambda x: 'Yes' if x < 0 else 'No')
             f.write("Golden Cross Check:\n")
@@ -150,7 +148,7 @@ def ma_create(stock_name):
     ax1.grid()
 
     plt.tight_layout()
-    plt.savefig('graph_images/' + stock_name + '_price.png')
+    plt.savefig('graph_images/' + stock_name + '_ma.png')
     plt.close()
 
     # Second Plot: MACD
@@ -168,7 +166,7 @@ def ma_create(stock_name):
         label.set_rotation(45)
 
     plt.tight_layout()
-    plt.savefig('graph_images/' + stock_name + '_macd.png')
+    plt.savefig('graph_images/macd/' + stock_name + '_macd.png')
     plt.close()
 
     

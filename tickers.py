@@ -75,3 +75,17 @@ all_tickers = [
     "RIVN"   # Rivian Automotive, Inc.
 ]
 
+
+
+robinhood_24_hour_stocks = [
+
+    "VZ",
+    "BMY",
+    "GIS",
+    "T",
+    "DX",
+    "PFLT"
+
+]
+
+

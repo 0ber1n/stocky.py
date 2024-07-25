@@ -19,9 +19,11 @@ def menu():
             print('Historical data download complete!')
 
         case '2':
+            os.system('rm trends/*')
             for tickers in all_tickers:
                 ma_create(tickers)
             print('Datapoints created')
+            
                     
         case '3':
             for tickers in all_tickers:
@@ -29,6 +31,14 @@ def menu():
             for tickers in all_tickers:
                 ma_create(tickers)
             print('Historical data downloaded and datapoints created')
+
+        case 'sleepy':
+            
+            for tickers in robinhood_24_hour_stocks:
+                data_dump(tickers)
+            for tickers in robinhood_24_hour_stocks:
+                ma_create(tickers)
+            print('Late night trading can start now')
            
         case _:
             return 'Invalide choice'

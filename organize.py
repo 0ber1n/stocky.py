@@ -2,21 +2,25 @@
 
 import os
 import matplotlib.pyplot as plt
-from datetime import datetime
+
 
 
 def image_folder_check():
         
     image_path = 'graph_images'
+    macd_path = image_path +'/macd'
     if not os.path.exists(image_path):
-        print('Graph images folder does not exist, creating folder')
+        print('Graph images folder does not exist, creating parent folder')
         os.makedirs(image_path)
         print(image_path + ' created')
+        if not os.path.exists(macd_path):
+            print('MACD folder does not exist, creating folder')
+            os.makedirs(image_path + '/macd')
+            print(macd_path + ' created')
+
         
     else: 
         print('Graph folder exists.')
-        current_date = datetime.now().strftime('%Y_%M_%D')
-current_time = datetime.now().strftime('%H:%M:%S')
 
 def stock_folder_check():
     stock_path = 'stocks'
@@ -36,7 +40,8 @@ def trends_folder_check():
         print(trends_path + ' created')
         
     else: 
-        print('Trends folder exists.')
+        print('Trends folder exists. Cleaning up now!')
+        os.system('rm trends/*')
 
 
 def logo():
@@ -51,7 +56,7 @@ def logo():
  \$$    $$  | $$    \$$    $$ \$$    $$| $$  \$$\    | $$     
   \$$$$$$    \$$     \$$$$$$   \$$$$$$  \$$   \$$     \$$     
                                                                     
-                                                                    
+ Created by 0ber1n                                                               
                                                                     
 ''')
     
