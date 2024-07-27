@@ -75,3 +75,57 @@ all_tickers = [
     "RIVN"   # Rivian Automotive, Inc.
 ]
 
+fifty_tickers = [
+    "AAPL",  # Apple Inc.
+    "MSFT",  # Microsoft Corporation
+    "NVDA",  # NVIDIA Corporation
+    "TSLA",  # Tesla, Inc.
+    "AMZN",  # Amazon.com, Inc.
+    "AMD",   # Advanced Micro Devices, Inc.
+    "INTC",  # Intel Corporation
+    "BAC",   # Bank of America Corporation
+    "F",     # Ford Motor Company
+    "WBA",   # Walgreens Boots Alliance, Inc.
+    "MARA",  # Marathon Digital Holdings, Inc.
+    "PLTR",  # Palantir Technologies Inc.
+    "GOOGL", # Alphabet Inc. (Class A)
+    "GOOG",  # Alphabet Inc. (Class C)
+    "ABT",   # Abbott Laboratories
+    "JNJ",   # Johnson & Johnson
+    "PG",    # Procter & Gamble Company
+    "CRM",   # Salesforce, Inc.
+    "ADBE",  # Adobe Inc.
+    "AXP",   # American Express Company
+    "LRCX",  # Lam Research Corporation
+    "CAT",   # Caterpillar, Inc.
+    "COST",  # Costco Wholesale Corporation
+    "QCOM",  # QUALCOMM Incorporated
+    "JPM",   # JP Morgan Chase & Co.
+    "MS",    # Morgan Stanley
+    "ANF",   # Abercrombie & Fitch Company
+    "SIRI",  # Sirius XM Holdings Inc.
+    "SOFI",  # SoFi Technologies, Inc.
+    "WBD",   # Warner Bros. Discovery, Inc.
+    "GTES",  # Gates Industrial Corporation plc
+    "ET",    # Energy Transfer LP
+    "V",     # Visa Inc.
+    "MA",    # Mastercard Incorporated
+    "NFLX",  # Netflix, Inc.
+    "DIS",   # The Walt Disney Company
+    "NKE",   # NIKE, Inc.
+    "ORCL",  # Oracle Corporation
+    "CSCO",  # Cisco Systems, Inc.
+    "PFE",   # Pfizer Inc.
+    "MRK",   # Merck & Co., Inc.
+    "T",     # AT&T Inc.
+    "VZ",    # Verizon Communications Inc.
+    "KO",    # The Coca-Cola Company
+    "XOM",   # Exxon Mobil Corporation
+    "CVX",   # Chevron Corporation
+    "TSM",   # Taiwan Semiconductor Manufacturing Company Limited
+    "SNAP",  # Snap Inc.
+    "SQ",    # Block, Inc. (formerly Square, Inc.)
+    "RIVN"   # Rivian Automotive, Inc.
+]
+
+

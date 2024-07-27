@@ -8,26 +8,29 @@ from datetime import datetime
 current_date = datetime.now().strftime('%Y_%m_%d')
 current_time = datetime.now().strftime('%H:%M:%S')
 
-def rsi_creation(data):
-
+def rsi_creation(data, window=14):
 
     # Calcutlate Relative Strength Indenx (RSI)
-    rs_window = 14
-    delta = data['Close'].diff()
+    delta = data['Close'].pct_change() * 100
 
     gain = delta.where(delta > 0, 0)
     loss = -delta.where(delta < 0, 0)
 
-    avg_gain = gain.rolling(window=rs_window, min_periods=1).mean()
-    avg_loss = loss.rolling(window=rs_window, min_periods=1).mean()
+    avg_gain = gain.rolling(window=window, min_periods=1).mean()
+    avg_loss = loss.rolling(window=window, min_periods=1).mean()
 
-    rs = avg_gain/avg_loss
-    rsi = 100 - (100/(1+rs))
-    
+    for i in range(window, len(avg_gain)):
+        avg_gain.iloc[i] = ((avg_gain.iloc[i-1] * (window -1)) + gain.iloc[i]) / window
+        avg_loss.iloc[i] = ((avg_loss.iloc[i-1] * (window -1)) + loss.iloc[i]) / window
+
+    rs = avg_gain / avg_loss
+    rsi = 100 - (100/(1 + rs))
+
+     
     data['RSI'] = rsi
 
     global rsi_recent
-    rsi_recent = rsi.iloc[-1]
+    rsi_recent = data['RSI'].iloc[-1]
 
     return data
 
@@ -50,16 +53,20 @@ def macd_creation(data):
 
 def calculate_uptick(sma):
     
-    last_4_days_sma = sma[-10:]
+    last_10_days_sma = sma[-10:]
     
     # Calculate the uptick values 
-    uptick_values = last_4_days_sma.diff().fillna(0)
+    uptick_values = last_10_days_sma.diff().fillna(0)
     
     return uptick_values
+
+
+
 
 def trend_identify(df, sma50, sma200, stock_name):
     recent_trend_days = 10
 
+    
     # Open the file in append mode
     with open('trends/' + current_date +'_trend_analysis_output.txt', 'a') as f:
         df['Recent_Trend'] = df[sma50].diff(periods=1)
@@ -82,8 +89,6 @@ def trend_identify(df, sma50, sma200, stock_name):
 
         # Checking the proximity to a possible golden cross
         df['golden_cross_check'] = df[sma200] - df[sma50]
-        print(df[sma50].iloc[-1])
-        print(df[sma200].iloc[-1])
         if df[sma50].iloc[-1] < df[sma200].iloc[-1]:
             df['Getting_Closer'] = df['golden_cross_check'].diff().apply(lambda x: 'Yes' if x < 0 else 'No')
             f.write("Golden Cross Check:\n")
@@ -95,9 +100,32 @@ def trend_identify(df, sma50, sma200, stock_name):
             f.write('Too late to join or time to sell.\n')
             f.write('\n')
         
-        f.write('**************************\n')
-    
-    return df
+
+        # Figure out trend score
+        last_five_trend = df['Trend'].iloc[-5:]
+        up_trend_count = last_five_trend.str.count('Up Trend').sum()
+        trend_score = 1 if up_trend_count >= 4 else 0
+        f.write('Trend Trigger: ' + str(trend_score) + '\n')
+        print(stock_name + ' Trend Score: ' + str(trend_score))
+        
+        if 'Getting_Closer' in df.columns:
+            last_five_golden = df['Getting_Closer'].iloc[-5:]
+            golden_yes_count = last_five_golden.str.count('Yes').sum()
+            golden_score = 1 if golden_yes_count >= 4 else 0
+        else:
+            golden_score = 0
+        f.write('Golden Score: ' + str(golden_score) + '\n')
+        print(stock_name + ' Golden Score:' + str(golden_score))
+
+        golden_trend = trend_score + golden_score
+        print('Golden Trend Score is ' + str(golden_score) + '\n')
+        f.write('Golden Trend Score is ' + str(golden_trend) + '\n\n')
+            
+
+        f.write('\n**************************\n')
+
+            
+    return df, golden_trend
 
 
 
@@ -116,7 +144,6 @@ def ma_create(stock_name):
     data['Date'] = pd.to_datetime(data['Date'])
     data = data.sort_values('Date')
     data.set_index('Date', inplace=True) 
-    
 
     # Calculate simple moving averages (SMA)
     data['50_SMA'] = data['Close'].rolling(window=50).mean()
@@ -127,9 +154,10 @@ def ma_create(stock_name):
     data['20_EMA'] = data['Close'].ewm(span=20, adjust=False).mean()
 
     data = rsi_creation(data)
+
     data = macd_creation(data)
 
-    data = trend_identify(data,'50_SMA','200_SMA', stock_name)
+    data, golden_trend = trend_identify(data,'50_SMA','200_SMA', stock_name)
 
     # Plotting
     # First Plot: Price and Moving Averages
@@ -147,7 +175,10 @@ def ma_create(stock_name):
     ax1.grid()
 
     plt.tight_layout()
-    plt.savefig('graph_images/' + stock_name + '_price.png')
+    if golden_trend ==2:
+        plt.savefig('graph_images/golden_trend/' + stock_name + '_ma.png')
+    else:
+        plt.savefig('graph_images/' + stock_name + '_ma.png')
     plt.close()
 
     # Second Plot: MACD
@@ -165,10 +196,10 @@ def ma_create(stock_name):
         label.set_rotation(45)
 
     plt.tight_layout()
-    plt.savefig('graph_images/' + stock_name + '_macd.png')
+    if golden_trend == 2:
+        plt.savefig('graph_images/golden_trend/' + stock_name + '_macd.png')
+    else:
+        plt.savefig('graph_images/macd/' + stock_name + '_macd.png')
     plt.close()
-
-    
-
 
 

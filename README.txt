@@ -21,5 +21,8 @@ $ pyhton3 stocky.py
 4. To view the graphs with the trends looking pretty, look for them in the graph_images folder. There you will see .png files for each ticker.
 
 
-
+    if not os.path.exists(macd_path):
+            print('MACD folder does not exist, creating folder')
+            os.makedirs(image_path + '/macd')
+            print(macd_path + ' created')
 
