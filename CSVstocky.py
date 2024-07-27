@@ -117,7 +117,12 @@ def trend_identify(df, sma50, sma200, stock_name):
         f.write('Golden Score: ' + str(golden_score) + '\n')
         print(stock_name + ' Golden Score:' + str(golden_score))
 
-        golden_trend = trend_score + golden_score
+        rsi_score = 1 if rsi_recent <= 70 else 0
+        f.write('RSI Score: ' + str(rsi_score) + '\n')
+        print(stock_name + ' RSI Score:' + str(rsi_score))
+
+
+        golden_trend = trend_score + golden_score + rsi_score
         print('Golden Trend Score is ' + str(golden_score) + '\n')
         f.write('Golden Trend Score is ' + str(golden_trend) + '\n\n')
             
@@ -138,68 +143,79 @@ def ma_create(stock_name):
     file_path = 'stocks/' + stock_name + '.csv'
 
     data = pd.read_csv(file_path)
-    print('Creating datapoints for ' + stock_name)
-    
-    # Ensure data is sorted by date
-    data['Date'] = pd.to_datetime(data['Date'])
-    data = data.sort_values('Date')
-    data.set_index('Date', inplace=True) 
 
-    # Calculate simple moving averages (SMA)
-    data['50_SMA'] = data['Close'].rolling(window=50).mean()
-    data['200_SMA'] = data['Close'].rolling(window=200).mean()
+    try:
+        if '404 Not Found' in data.values:
+            print(f"Skipping {stock_name} due to '404 Not Found' in data.")
+            return
+                # Ensure 'Date' column exists
+        if 'Date' not in data.columns:
+            print(f"Skipping {stock_name} due to missing 'Date' column.\n")
+            return
+        print('Creating datapoints for ' + stock_name)
+        
+        # Ensure data is sorted by date
+        data['Date'] = pd.to_datetime(data['Date'])
+        data = data.sort_values('Date')
+        data.set_index('Date', inplace=True) 
 
-    # Calculate Exponential Moving Data (EMA)
-    data['8_EMA'] = data['Close'].ewm(span=8, adjust=False).mean()
-    data['20_EMA'] = data['Close'].ewm(span=20, adjust=False).mean()
+        # Calculate simple moving averages (SMA)
+        data['50_SMA'] = data['Close'].rolling(window=50).mean()
+        data['200_SMA'] = data['Close'].rolling(window=200).mean()
 
-    data = rsi_creation(data)
+        # Calculate Exponential Moving Data (EMA)
+        data['8_EMA'] = data['Close'].ewm(span=8, adjust=False).mean()
+        data['20_EMA'] = data['Close'].ewm(span=20, adjust=False).mean()
 
-    data = macd_creation(data)
+        data = rsi_creation(data)
 
-    data, golden_trend = trend_identify(data,'50_SMA','200_SMA', stock_name)
+        data = macd_creation(data)
 
-    # Plotting
-    # First Plot: Price and Moving Averages
-    fig, ax1 = plt.subplots(figsize=(14, 7))
+        data, golden_trend = trend_identify(data,'50_SMA','200_SMA', stock_name)
 
-    ax1.plot(data.index, data['Close'], label='Close Price', color='blue')
-    ax1.plot(data.index, data['50_SMA'], label='50-Day SMA', color='orange')
-    ax1.plot(data.index, data['200_SMA'], label='200-Day SMA', color='red')
-    ax1.plot(data.index, data['8_EMA'], label='8-Day EMA', color='pink')
-    ax1.plot(data.index, data['20_EMA'], label='20-Day EMA', color='black')
-    ax1.set_title(stock_name + ' (RSI = ' + str(rsi_recent.round(2)) + ')')
-    ax1.set_xlabel('Date')
-    ax1.set_ylabel('Price')
-    ax1.legend()
-    ax1.grid()
+        # Plotting
+        # First Plot: Price and Moving Averages
+        fig, ax1 = plt.subplots(figsize=(14, 7))
 
-    plt.tight_layout()
-    if golden_trend ==2:
-        plt.savefig('graph_images/golden_trend/' + stock_name + '_ma.png')
-    else:
-        plt.savefig('graph_images/' + stock_name + '_ma.png')
-    plt.close()
+        ax1.plot(data.index, data['Close'], label='Close Price', color='blue')
+        ax1.plot(data.index, data['50_SMA'], label='50-Day SMA', color='orange')
+        ax1.plot(data.index, data['200_SMA'], label='200-Day SMA', color='red')
+        ax1.plot(data.index, data['8_EMA'], label='8-Day EMA', color='pink')
+        ax1.plot(data.index, data['20_EMA'], label='20-Day EMA', color='black')
+        ax1.set_title(stock_name + ' (RSI = ' + str(rsi_recent.round(2)) + ')')
+        ax1.set_xlabel('Date')
+        ax1.set_ylabel('Price')
+        ax1.legend()
+        ax1.grid()
 
-    # Second Plot: MACD
-    fig, ax2 = plt.subplots(figsize=(14, 7))
+        plt.tight_layout()
+        if golden_trend ==3:
+            plt.savefig('graph_images/golden_trend/' + stock_name + '_ma.png')
+        else:
+            plt.savefig('graph_images/' + stock_name + '_ma.png')
+        plt.close()
 
-    ax2.plot(data.index, data['MACD'], label='MACD', color='g')
-    ax2.plot(data.index, data['MACD_Signal'], label='Signal Line', color='r')
-    ax2.bar(data.index, data['MACD_Hist'], label='MACD Hist', color='b', alpha=0.3)
-    ax2.set_title('MACD for ' + stock_name)
-    ax2.set_xlabel('Date')
-    ax2.legend()
-    ax2.grid()
+        # Second Plot: MACD
+        fig, ax2 = plt.subplots(figsize=(14, 7))
 
-    for label in ax2.get_xticklabels():
-        label.set_rotation(45)
+        ax2.plot(data.index, data['MACD'], label='MACD', color='g')
+        ax2.plot(data.index, data['MACD_Signal'], label='Signal Line', color='r')
+        ax2.bar(data.index, data['MACD_Hist'], label='MACD Hist', color='b', alpha=0.3)
+        ax2.set_title('MACD for ' + stock_name)
+        ax2.set_xlabel('Date')
+        ax2.legend()
+        ax2.grid()
 
-    plt.tight_layout()
-    if golden_trend == 2:
-        plt.savefig('graph_images/golden_trend/' + stock_name + '_macd.png')
-    else:
-        plt.savefig('graph_images/macd/' + stock_name + '_macd.png')
-    plt.close()
+        for label in ax2.get_xticklabels():
+            label.set_rotation(45)
+
+        plt.tight_layout()
+        if golden_trend == 3:
+            plt.savefig('graph_images/golden_trend/' + stock_name + '_macd.png')
+        else:
+            plt.savefig('graph_images/macd/' + stock_name + '_macd.png')
+        plt.close()
+    except Exception as e:
+        print(f"An error occurred while processing {stock_name}: {e}\n")
 
 
