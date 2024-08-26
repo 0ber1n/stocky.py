@@ -1,4 +1,4 @@
-Need to write this out more.
+Need to write this out more. This app is still in development and plan to keep smoothing it out and making it a more optimal use. This applicaiton does not guarantee any success in the stock market. In fact I lost $ the first time I bought solely off these results. This is why I moved it to public, as smarter stock bros and brodettes could maybe add some other metrics to track.
 
 
 $ pyhton3 stocky.py
@@ -26,3 +26,4 @@ $ pyhton3 stocky.py
             os.makedirs(image_path + '/macd')
             print(macd_path + ' created')
 
+*NOTE* The sleep timer in the historical data dump is optimized to the best rate limit I found due to yahoo finance's throttle limit for downloads. Moving that sleep timer down could risk files not populating with data...which is not fun finding out you stopped getting data at file.
