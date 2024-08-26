@@ -1,7 +1,8 @@
 Need to write this out more. This app is still in development and plan to keep smoothing it out and making it a more optimal use. This applicaiton does not guarantee any success in the stock market. In fact I lost $ the first time I bought solely off these results. This is why I moved it to public, as smarter stock bros and brodettes could maybe add some other metrics to track.
 
+Welcom to stocky.py. This is my first major project with python graduating from salary take home calculators. 
 
-$ pyhton3 stocky.py
+$ python3 stocky.py
 
 1. stocky.py is utilized to find the moving average of stocks between the last 200 days compared to the last 50 days.
    This is only one way to analyse known trends, and cannot predict the market accurately.
